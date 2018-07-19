@@ -473,6 +473,8 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
 #'
 #' @param basis The basis
 #' @param data The data to be explained
+#' @param weightinv Inverse of W (identity if NULL)
+#' @param 
 #'
 #' @return The proportion of variability in the data that is explained by the basis
 #'
@@ -482,7 +484,7 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
 #  explained <- crossprod(c(recon))/crossprod(c(data))
 #  return(explained)
 #}
-VarExplained <- function(basis, data, weightinv = NULL){
+VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL){
   recon <- basis %*% t(CalcScores(data, basis, weightinv))
   if (is.null(weightinv)){
     explained <- crossprod(c(recon))/crossprod(c(data))
@@ -497,7 +499,12 @@ VarExplained <- function(basis, data, weightinv = NULL){
     #for (i in 1:dim(data)[2]){
     #  explained_den <- explained_den + t(data[,i]) %*% weightinv %*% data[,i]
     #}
-    explained_den <- sum(diag(t(data) %*% weightinv %*% data))
+    if (is.null(total_sum)){
+      explained_den <- sum(diag(t(data) %*% weightinv %*% data))
+    }
+    else {
+      explained_den <- total_sum
+    }
     explained <- explained_num / explained_den
   }
   return(explained)
