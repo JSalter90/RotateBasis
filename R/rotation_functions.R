@@ -474,7 +474,9 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
 #' @param basis The basis
 #' @param data The data to be explained
 #' @param weightinv Inverse of W (identity if NULL)
-#' @param 
+#' @param total_sum The total sum of squares of the data with respect to W
+#' @param psi t(original_basis) %*% weightinv %*% original_basis, where the new basis is a linear combination of some original basis
+#' @param basis_lincom Vector of linear combinations (if new basis is a linear combination of some original basis)
 #'
 #' @return The proportion of variability in the data that is explained by the basis
 #'
@@ -484,13 +486,21 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
 #  explained <- crossprod(c(recon))/crossprod(c(data))
 #  return(explained)
 #}
-VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL){
-  recon <- basis %*% t(CalcScores(data, basis, weightinv))
+VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL, psi = NULL, basis_lincom = NULL){
+  coeffs <- t(CalcScores(data, basis, weightinv))
+  recon <- basis %*% coeffs
   if (is.null(weightinv)){
     explained <- crossprod(c(recon))/crossprod(c(data))
   }
   else {
-    explained_num <- sum(diag(t(recon) %*% weightinv %*% recon))
+    if (is.null(psi)){
+      explained_num <- sum(diag(t(recon) %*% weightinv %*% recon))
+    }
+    else {
+      stopifnot(!is.null(basis_lincom))
+      explained_num <- t(coeffs) %*% t(basis_lincom) %*% psi %*% basis_lincom %*% coeffs
+      explained_num <- sum(diag(explained_num))
+    }
     #explained_num <- 0
     #for (i in 1:dim(data)[2]){
     #  explained_num <- explained_num + t(recon[,i]) %*% weightinv %*% recon[,i]
