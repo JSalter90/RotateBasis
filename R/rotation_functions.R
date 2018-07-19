@@ -488,14 +488,16 @@ VarExplained <- function(basis, data, weightinv = NULL){
     explained <- crossprod(c(recon))/crossprod(c(data))
   }
   else {
-    explained_num <- 0
-    for (i in 1:dim(data)[2]){
-      explained_num <- explained_num + t(recon[,i]) %*% weightinv %*% recon[,i]
-    }
-    explained_den <- 0
-    for (i in 1:dim(data)[2]){
-      explained_den <- explained_den + t(data[,i]) %*% weightinv %*% data[,i]
-    }
+    explained_num <- sum(diag(t(recon) %*% weightinv %*% recon))
+    #explained_num <- 0
+    #for (i in 1:dim(data)[2]){
+    #  explained_num <- explained_num + t(recon[,i]) %*% weightinv %*% recon[,i]
+    #}
+    #explained_den <- 0
+    #for (i in 1:dim(data)[2]){
+    #  explained_den <- explained_den + t(data[,i]) %*% weightinv %*% data[,i]
+    #}
+    explained_den <- sum(diag(t(data) %*% weightinv %*% data))
     explained <- explained_num / explained_den
   }
   return(explained)
