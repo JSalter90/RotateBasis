@@ -409,11 +409,17 @@ RotateBasis <- function(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.
   mse <- var <- numeric(kmax)
   x <- NULL
   new.basis <- NULL
+  if (is.null(weightinv)){
+    var_sum <- crossprod(c(data))
+  }
+  else {
+    var_sum <- sum(diag(t(data) %*% weightinv %*% data)) # only need to calculate once
+  }
   for (i in 1:kmax){
     p <- dim(basis)[2]
     opt <- GenSA(c(1, rep(0, p-1)), WeightOptim,  lower = rep(-1, p*1),
                  upper = rep(1, p*1), basis = basis, obs = obs, data = data, weightinv = weightinv,
-                 v = v[i], newvectors = new.basis, control = list(max.time = MaxTime), ...)
+                 v = v[i], newvectors = new.basis, total_sum = var_sum, control = list(max.time = MaxTime), ...)
     best.patterns <- cbind(new.basis, ReconBasis(opt$par, basis))
     rank <- min(n, l)
     basis <- ResidBasis(best.patterns, data, weightinv)[,1:rank]
