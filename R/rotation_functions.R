@@ -566,8 +566,14 @@ VarMSEplot <- function(DataBasis, obs, RecVarData = NULL, weightinv=NULL, min.li
     else {
       PlotData[,1] <- errors(DataBasis$tBasis[,1:qmax], obs, weightinv)
     }
+    if (is.null(weightinv)){
+      var_sum <- crossprod(c(data))
+    }
+    else {
+      var_sum <- sum(diag(t(DataBasis$CentredField) %*% weightinv %*% DataBasis$CentredField))
+    }
     for (i in 1:qmax){
-      PlotData[i,2] <- VarExplained(DataBasis$tBasis[,1:i], DataBasis$CentredField, weightinv)
+      PlotData[i,2] <- VarExplained(DataBasis$tBasis[,1:i], DataBasis$CentredField, weightinv, total_sum = var_sum)
     }
   }
   if (qmax < p){
