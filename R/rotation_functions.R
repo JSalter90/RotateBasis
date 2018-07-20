@@ -638,21 +638,23 @@ VarProj <- function(mat, basis, weightinv = NULL){
 #' @param data Ensemble data
 #' @param weightinv Inverse of matrix W
 #' @param v The proportion of variability to be explained by the basis vector
+#' @param total_sum Common denominator used to calculate VarExplained
+#' @param psi As new basis is linear combinarion of original, if pass psi = t(basis) %*% weightinv %*% basis adds efficiency
 #' @param newvectors If the reconstruction error should account for any previous basis vectors
 #'
 #' @return The reconstruction error
 #'
 #' @export
-WeightOptim <- function(x, basis, obs, data, weightinv, v = 0.1, newvectors = NULL){
+WeightOptim <- function(x, basis, obs, data, weightinv, v = 0.1, total_sum = NULL, psi = NULL, newvectors = NULL){
   new.basis <- as.vector(tensor(basis, x, 2, 1))
   if (is.null(newvectors) == FALSE){
     new.basis <- cbind(newvectors, new.basis)
   }
   if (is.null(newvectors) == TRUE){
-    v_new <- VarExplained(new.basis, data, weightinv)
+    v_new <- VarExplained(new.basis, data, weightinv, total_sum, psi, basis_lincom = x)
   }
   else {
-    v_new <- VarExplained(new.basis[,dim(new.basis)[2]], data, weightinv)
+    v_new <- VarExplained(new.basis[,dim(new.basis)[2]], data, weightinv, total_sum, psi, basis_lincom = x)
   }
   if (v_new < v){
     y <- 999999999
