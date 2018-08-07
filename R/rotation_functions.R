@@ -41,7 +41,6 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE){
 #' @return The weighted SVD of the data.
 #'
 wsvd <- function(data, weightinv = NULL){
-  require(sSDR)
   if (is.null(weightinv)){
     svd_output <- svd(data)
   }
