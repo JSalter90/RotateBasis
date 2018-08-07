@@ -47,9 +47,14 @@ wsvd <- function(data, weightinv = NULL){
   }
   else {
     stopifnot(dim(data)[2] == dim(weightinv)[1])
-    data_w <- data %*% matpower(weightinv, 0.5)
+    eig <- eigen(weightinv)
+    Q <- eig$vectors
+    Lambda <- eig$values
+    data_w <- data %*% Q %*% diag(sqrt(Lambda)) %*% t(Q)
     svd_output <- svd(data_w)
-    svd_output$v <- t(t(svd_output$v) %*% matpower(weightinv, -0.5))
+    svd_output$v <- t(t(svd_output$v) %*% Q %*% diag(1 / sqrt(Lambda)) %*% t(Q))
+    svd_output$Q <- Q
+    svd_output$Lambda <- Lambda
   }
   return(svd_output)
 }
