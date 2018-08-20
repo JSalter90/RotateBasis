@@ -433,6 +433,14 @@ RotateBasis <- function(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.
   else {
     var_sum <- sum(diag(t(data) %*% weightinv %*% data)) # only need to calculate once
   }
+  if (is.null(DataBasis$Q)){
+    Q <- NULL
+    Lambda <- NULL
+  }
+  else {
+    Q <- DataBasis$Q
+    Lambda <- DataBasis$Lambda
+  }
   for (i in 1:kmax){
     p <- dim(basis)[2]
     if (is.null(weightinv)){
@@ -446,7 +454,7 @@ RotateBasis <- function(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.
                  v = v[i], newvectors = new.basis, total_sum = var_sum, psi = psi, control = list(max.time = MaxTime), ...)
     best.patterns <- cbind(new.basis, ReconBasis(opt$par, basis))
     rank <- min(n, l)
-    basis <- ResidBasis(best.patterns, data, weightinv)[,1:rank]
+    basis <- ResidBasis(best.patterns, data, weightinv, Q, Lambda)[,1:rank]
     x <- c(x, opt$par)
     q <- ExplainT(DataBasis, vtot, weightinv)
     mse[i] <- ReconError(obs, basis[,1:q], weightinv)
@@ -491,7 +499,7 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
     svd.resid <- svd(t(resids))
   }
   else {
-    svd.resid <- wsvd(t(resids), weightinv = weightinv)
+    svd.resid <- wsvd(t(resids), weightinv = weightinv, ...)
   }
   new.basis <- cbind(basisvectors, svd.resid$v)[,1:min(l,n)]
   return(new.basis)
