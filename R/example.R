@@ -100,7 +100,7 @@ plot.field(ObsReconRot, dim1 = 10, zlim = c(-10,26), main = "Rotated basis recon
 
 # So now we have a rotated basis that better represents observations (truncation now after we've
 # minimised reconstruction error R_W), project onto rotated basis
-# Usually require an extra basis to explain same proportion
+# Usually require an extra basis vector to explain same proportion
 q2rot <- ExplainT(RotatedBasis2, vtot = 0.95, weightinv = Winv)
 RotatedCoeffs <- CalcScores(data = RotatedBasis2$CentredField, basis = RotatedBasis2$tBasis[,1:q2rot], weightinv = Winv)
 dim(RotatedCoeffs) # number of ensemble members x number of basis vectors to emulate
