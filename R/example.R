@@ -30,7 +30,7 @@ DataBasis2$tBasis[,1] %*% Winv %*% DataBasis2$tBasis[,2] # orthogonal basis vect
 DataBasis2$tBasis[,1] %*% Winv %*% DataBasis2$tBasis[,1] # with length 1
 
 # We have stored the eigendecomposition of Winv in DataBasis2
-# This was needed for wSVD, and will come in useul when calculating the residual basis at each iteration of the rotation
+# This was needed for wSVD, and will come in useful when calculating the residual basis at each iteration of the rotation
 summary(c(Winv - DataBasis2$Q %*% (diag(DataBasis2$Lambda)) %*% t(DataBasis2$Q)))
 
 # Centre observations by the ensemble mean
@@ -66,7 +66,14 @@ VarMSEplot(DataBasis = RotatedBasis1, obs = obsc, ylim = c(0,26))
 VarMSEplot(RecVarData = v2, obs = obsc, weightinv = Winv, ylim = c(0,500))
 VarMSEplot(DataBasis = RotatedBasis2, obs = obsc, weightinv = Winv, ylim = c(0,500))
 
+# So now we have a rotated basis that better represents observations (truncation now after we've
+# minimised reconstruction error R_W), project onto rotated basis
+# Usually require an extra basis to explain same proportion
+q2rot <- ExplainT(RotatedBasis2, vtot = 0.95, weightinv = Winv)
+RotatedCoeffs <- CalcScores(data = RotatedBasis2$CentredField, basis = RotatedBasis2$tBasis[,1:q2rot], weightinv = Winv)
+dim(RotatedCoeffs) # number of ensemble members x number of basis vectors to emulate
 
+# Then emulate each set of coeffs (each column of RotatedCoeffs)
 
 
 # Other examples to come:
