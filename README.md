@@ -1,6 +1,6 @@
 # RotateBasis
 
-A package that finds a calibration-optimal basis for high-dimensional computer model output, by combining important patterns containe din the observations with leading directions of variability in the ensemble.
+A package that finds a calibration-optimal basis for high-dimensional computer model output, by combining important patterns contained in the observations with leading directions of variability in the ensemble.
 
 Based on paper https://arxiv.org/abs/1801.08184 (accepted by Journal of the American Statistical Association, publication in progress).
 
