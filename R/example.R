@@ -66,6 +66,38 @@ VarMSEplot(DataBasis = RotatedBasis1, obs = obsc, ylim = c(0,26))
 VarMSEplot(RecVarData = v2, obs = obsc, weightinv = Winv, ylim = c(0,500))
 VarMSEplot(DataBasis = RotatedBasis2, obs = obsc, weightinv = Winv, ylim = c(0,500))
 
+# Look at some plots of the bases, reconstructions
+plot.field <- function(field, dim1, col = rainbow(100,start=0.1,end=0.8), ...){
+  require(fields)
+  x <- 1:dim1
+  y <- 1:dim1
+  image.plot(x, y, matrix(field, nrow = dim1), col = col, add = FALSE, ...)
+}
+# Original basis
+par(mfrow=c(2,3),mar=c(4,4,2,2))
+zmax <- max(c(abs(DataBasis2$tBasis[,1:q2])))
+for (i in 1:q2){
+  plot.field(DataBasis2$tBasis[,i], dim1 = 10, zlim = c(-zmax,zmax))
+}
+
+# Rotated basis
+par(mfrow=c(2,3),mar=c(4,4,2,2))
+zmax <- max(c(abs(RotatedBasis2$tBasis[,1:q2rot])))
+for (i in 1:q2rot){
+  plot.field(RotatedBasis2$tBasis[,i], dim1 = 10, zlim = c(-zmax,zmax))
+}
+
+# Reconstruction with original basis
+par(mfrow=c(1,3), mar = c(4,4,2,2))
+plot.field(obs, dim1 = 10, zlim = c(-10,26), main = "Truth")
+
+ObsRecon <- DataBasis2$EnsembleMean + ReconObs(obsc, DataBasis2$tBasis[,1:q2], weightinv = Winv)
+plot.field(ObsRecon, dim1 = 10, zlim = c(-10,26), main = "SVD basis recon")
+
+# Reconstruction with rotated basis
+ObsReconRot <- DataBasis2$EnsembleMean + ReconObs(obsc, RotatedBasis2$tBasis[,1:q2rot], weightinv = Winv)
+plot.field(ObsReconRot, dim1 = 10, zlim = c(-10,26), main = "Rotated basis recon")
+
 # So now we have a rotated basis that better represents observations (truncation now after we've
 # minimised reconstruction error R_W), project onto rotated basis
 # Usually require an extra basis to explain same proportion
