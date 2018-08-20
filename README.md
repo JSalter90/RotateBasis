@@ -4,7 +4,7 @@ A package that finds a calibration-optimal basis for high-dimensional computer m
 
 Based on paper https://arxiv.org/abs/1801.08184 (accepted by Journal of the American Statistical Association, publication in progress).
 
-This package is still in development, with updates to come by September 5th.
+This package is still in development, with more updates to come by September 5th.
 
 If you spot a bug or have queries about how to use RotateBasis, contact j.m.salter@exeter.ac.uk
 
