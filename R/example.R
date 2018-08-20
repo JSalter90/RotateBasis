@@ -24,7 +24,10 @@ sum(DataBasis1$tBasis[,1] * DataBasis1$tBasis[,2]) # orthogonal basis vectors in
 
 tmp <- t(runif(100,0.01,5))
 W <- t(tmp) %*% tmp + runif(100,0.01,0.1)*diag(100) # some positive definite 100x100 weight matrix
-Winv <- GetInverse(W) # invert via chol
+
+# Need inverse of W, GetInverse does this via cholesky decomposition, and assigns attributes
+# (whether diagonal, whether the identity) that speeds up later calculations
+Winv <- GetInverse(W)
 DataBasis2 <- MakeDataBasis(data = output, weightinv = Winv, RemoveMean = TRUE)
 DataBasis2$tBasis[,1] %*% Winv %*% DataBasis2$tBasis[,2] # orthogonal basis vectors in W
 DataBasis2$tBasis[,1] %*% Winv %*% DataBasis2$tBasis[,1] # with length 1
