@@ -5,13 +5,15 @@
 #' @param data a matrix containing individual fields in the columns (i.e. the matrix has dimension lxn)
 #' @param weightinv the inverse of lxl positive definite weight matrix W. If NULL, the identity matrix is used
 #' @param RemoveMean if TRUE, centres the data prior to calculating the basis
+#' @param StoreEigen if TRUE, stores Q, lambda from eigendecomposition of W (in order to make later calculations more efficient)
 #'
 #' @return \item{tBasis}{The (weighted) SVD basis of the centred ensemble if RemoveMean = TRUE, of the original data otherwise}
 #' \item{CentredField}{The centred data if RemoveMean = TRUE, the original data otherwise.}
 #' \item{EnsembleMean}{The mean across the columns of the data. A zero vector if RemoveMean = FALSE}
+#' \item{}
 #'
 #' @export
-MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE){
+MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen = TRUE){
   if (RemoveMean == TRUE){
     EnsembleMean <- apply(data, 1, mean)
     CentredField <- 0*data
@@ -26,8 +28,16 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE){
   if (is.null(weightinv)){
     weightinv <- diag(dim(data)[1])
   }
-  tBasis <- wsvd(t(CentredField), weightinv = weightinv)$v
-  return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean))
+  tSVD <- wsvd(t(CentredField), weightinv = weightinv)
+  tBasis <- tSVD$v
+  if (StoreEigen == TRUE){
+    Q <- tSVD$Q
+    Lambda <- tSVD$Lambda
+    return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean, Q = Q, Lambda = Lambda))
+  }
+  else {
+    return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean))
+  }
 }
 
 
