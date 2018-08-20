@@ -593,7 +593,7 @@ VarMSEplot <- function(DataBasis, obs, RecVarData = NULL, weightinv=NULL, min.li
       PlotData[,1] <- errors(DataBasis$tBasis[,1:qmax], obs, weightinv)
     }
     if (is.null(weightinv)){
-      var_sum <- crossprod(c(data))
+      var_sum <- crossprod(c(DataBasis$CentredField))
     }
     else {
       var_sum <- sum(diag(t(DataBasis$CentredField) %*% weightinv %*% DataBasis$CentredField))
