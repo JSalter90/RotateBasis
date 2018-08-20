@@ -47,18 +47,22 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen 
 #'
 #' @param data n x l matrix to calculate basis from (i.e. rows are output fields).
 #' @param weightinv l x l inverse of W. If NULL, calculates standard SVD.
+#' @param Q l x l matrix from eigen decomposition of W^{-1}, can provide in place of weightinv
+#' @param Lambda vector from eigen decomposition of W^{-1}, can provide in place of weightinv
 #'
 #' @return The weighted SVD of the data.
 #'
-wsvd <- function(data, weightinv = NULL){
-  if (is.null(weightinv)){
+wsvd <- function(data, weightinv = NULL, Q = NULL, Lambda = NULL){
+  if (is.null(weightinv) & is.null(Q) & is.null(Lambda)){
     svd_output <- svd(data)
   }
   else {
     stopifnot(dim(data)[2] == dim(weightinv)[1])
-    eig <- eigen(weightinv)
-    Q <- eig$vectors
-    Lambda <- eig$values
+    if (is.null(Q)){
+      eig <- eigen(weightinv)
+      Q <- eig$vectors
+      Lambda <- eig$values
+    }
     data_w <- data %*% Q %*% diag(sqrt(Lambda)) %*% t(Q)
     svd_output <- svd(data_w)
     svd_output$v <- t(t(svd_output$v) %*% Q %*% diag(1 / sqrt(Lambda)) %*% t(Q))
