@@ -12,3 +12,4 @@ If you spot a bug or have queries about how to use RotateBasis, contact j.m.salt
 
 - More examples/documentation
 - Improved optimisation at the rotation step
+- Automatically setting v
