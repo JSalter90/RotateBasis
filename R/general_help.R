@@ -1,25 +1,9 @@
-
 #### Inputs required ####
 # ensemble (n runs, l-dimensional output field), lxn matrix (each run of the model is a column)
 # observations (vector of length l)
-
-
-
-#### Formatting data ####
-# MakeDataBasis formats the ensemble so that later functions can be applied
-## $CentredField - the ensemble that the basis will be calculated from. 
-##                 If RemoveMean = FALSE, then this is just the ensemble
-##                 If RemoveMean = TRUE, the ensemble mean is calculated, and removed
-## $EnsembleMean - the ensemble mean, a vector of length l
-## $tBasis - the SVD (or weighted SVD basis), calculated across CentredField
-## $Q, $Lambda - from the eigendecomposition of W^{-1}. These are used if calculating the
-##               weighted SVD basis, and will be useful later when calculating the residual
-##               basis at each iteration of the rotation algorithm
-
-#### Centering observations ####
-# If the basis is calculated from the centred ensemble, also need to subtract the ensemble
-# mean from the observations
-# This is currently a manual operation
+# weight matrix - lxl variance matrix. We use the observation error + discrepancy variance,
+#                 for the parallel to history matching that this gives. Alternatively, can just
+#                 ignore, and the code defaults to L_2 projection/SVD (i.e. W = identity)
 
 
 #### Setting W, W^{-1} ####
@@ -30,13 +14,44 @@
 # will be ruled out.
 # If W is not the identity matrix, calculate the inverse via GetInverse, as this assigns 
 # attributes to W^{-1}:
+GetInverse(W)
 ## $diagonal - is W^{-1} a diagonal matrix?
 ## $identity - is W^{-1} the identity matrix?
-# These allow computational improvements to be made in other functions
+# These allow computational improvements to be made in other functions, as when W has structure,
+# this is used in projection, calculating the reconstruction error, rotation, etc.
+
+
+#### Important: if W is NOT a multiple of the identity matrix, then you should project in   ####
+##   the norm given by W^{-1}. To do so, each function that has a `weightinv' input currently ##`
+##   needs to be passed the output of GetInverse(W). In future, this may be tagged onto the   ##
+##   DataBasis object to make things easier.                                                  ##
+##   It is possible to project in L_2 (W = identity), even when a structured W is known,      ##
+##   however this will not give optimal projections, and in some cases more affect emulation, ##
+##   calibration/HM results, etc.                                                             ##
+
+
+#### Formatting data ####
+# MakeDataBasis formats the ensemble (== data) so that later functions can be applied
+MakeDataBasis(data, weightinv = NULL, RemoveMean = TRUE)
+## $CentredField - the ensemble that the basis will be calculated from. 
+##                 If RemoveMean = FALSE, then this is just the ensemble
+##                 If RemoveMean = TRUE, the ensemble mean is calculated, and removed
+## $EnsembleMean - the ensemble mean, a vector of length l
+## $tBasis - the SVD (or weighted SVD basis, if W^{-1} is given), calculated across CentredField
+## $Q, $Lambda - from the eigendecomposition of W^{-1}. These are used if calculating the
+##               weighted SVD basis, and will be useful later when calculating the residual
+##               basis at each iteration of the rotation algorithm
+
+
+#### Centering observations ####
+# If the basis is calculated from the centred ensemble, also need to subtract the ensemble
+# mean from the observations
+# This is currently a manual operation, e.g.
+CentredObs <- TrueObs - DataBasis$EnsembleMean
 
 
 #### General functions ####
-# Given data, basis, observations, can
+# Given data, basis, observations, possibly W^{-1}, can
 ## project fields onto a basis, giving set of coefficients
 CalcScores(data, basis, weightinv = NULL)
 ## reconstruct fields from a set of coefficients
@@ -44,18 +59,20 @@ Recon(coeffs, basis)
 ## wrapper that does both operations at once (so can find representation of observations
 ## on chosen basis)
 ReconObs(obs, basis, weightinv = NULL)
-## calculating the reconstruction error of the observations (default is to scale by dimension,
+## calculate the reconstruction error of the observations (default is to scale by dimension,
 ## analogous to MSE)
 ReconError(obs, basis, weightinv = NULL, scale = TRUE)
 ## calculating variance explained by a basis/basis vector
 VarExplained(basis, data, weightinv = NULL, total_sum = NULL, psi = NULL, basis_lincom = NULL)
-## the total_sum, psi, basis_lincom options are useful in the rotation algorithm
+## (the total_sum, psi, basis_lincom options are used in the rotation algorithm)
+
 
 #### Assessing basis quality ####
 # VarMSEplots show how reconstruction error changes as add basis vectors, compared to
 # the history match bound, so can assess whether, given current ensemble/W, the truncated
 # basis would rule out the observations (horizontal dotted line)
-VarMSEplot(DataBasis, obs, RecVarData = NULL, weightinv=NULL, min.line=TRUE, bound=TRUE, qmax = NULL)
+VarMSEplot(DataBasis, obs, weightinv=NULL)
+# Several other inputs (see other documentation), but fine to be left as defaults
 
 
 #### Basis rotation ####
@@ -81,18 +98,3 @@ RotateBasis(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.1,5)), vtot 
 ##         some basis vectors, e.g. just rotate first 100 => prior = 1:100
 ## MaxTime - generally quite fast, 60 seconds is fine (for l < 1000, MaxTime < 30 should be ok)
   
-
-
-
-
-
-  
-  
-
-
-
-# 
-
-
-
-
