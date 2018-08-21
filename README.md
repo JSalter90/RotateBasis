@@ -8,6 +8,12 @@ This package is still in development, with more updates to come by September 5th
 
 If you spot a bug or have queries about how to use RotateBasis, contact j.m.salter@exeter.ac.uk
 
+## Files
+
+rotation_functions.R - source code for the functions
+example.R - a worked toy example
+general_help.R - general strategy for how to set up data, W, and use the key functions
+
 ## Updates to come:
 
 - More examples/documentation
