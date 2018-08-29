@@ -632,8 +632,7 @@ errors <- function(basis, obs, weightinv=NULL){
     attr(weightinv, 'diagonal') <- attr(weightinv, 'identity') <- TRUE
   }
   for (i in 1:p){
-    recon <- ReconObs(obs, basis[,1:i], weightinv)
-    err[i] <- ReconError(obs, recon, weightinv)
+    err[i] <- ReconError(obs, basis[,1:i], weightinv)
   }
   return(err)
 }
