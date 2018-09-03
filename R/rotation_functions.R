@@ -532,11 +532,17 @@ VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL, psi = 
   }
   else {
     if (is.null(psi)){
-      explained_num <- sum(diag(t(recon) %*% weightinv %*% recon))
+      if (attributes(weightinv)$diagonal == TRUE){
+        explained_num <- sum(t(recon)^2 %*% diag(weightinv))
+      }
+      else {
+        explained_num <- sum(diag(t(recon) %*% weightinv %*% recon))
+      }
     }
     else {
       stopifnot(!is.null(basis_lincom))
-      explained_num <- t(coeffs) %*% t(basis_lincom) %*% psi %*% basis_lincom %*% coeffs
+      explained_num <- t(coeffs) %*% t(basis_lincom) %*% psi %*%
+        basis_lincom %*% coeffs
       explained_num <- sum(diag(explained_num))
     }
     #explained_num <- 0
@@ -548,7 +554,12 @@ VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL, psi = 
     #  explained_den <- explained_den + t(data[,i]) %*% weightinv %*% data[,i]
     #}
     if (is.null(total_sum)){
-      explained_den <- sum(diag(t(data) %*% weightinv %*% data))
+      if (attributes(weightinv)$diagonal == TRUE){
+        explained_den <- sum(t(data)^2 %*% diag(weightinv))
+      }
+      else {
+        explained_den <- sum(diag(t(data) %*% weightinv %*% data))
+      }
     }
     else {
       explained_den <- total_sum
