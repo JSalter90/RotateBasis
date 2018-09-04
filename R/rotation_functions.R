@@ -623,7 +623,7 @@ VarMSEplot <- function(DataBasis, obs, RecVarData = NULL, weightinv=NULL, min.li
   }
   plot(plotseq, PlotData[,1], type="l", col="red",xlab = expression(k), ylab=expression(paste("R "[bold(W)], " (", bold(B)[k], ",", bold(z), ")", " / l")), ...)
   if (min.line)
-    abline(h = min(PlotData[,1]), col="black", lty=1)
+    abline(h = min(PlotData[,1]), col=alpha("black", 0.7), lty=4)
   if (bound == TRUE){
     abline(h = qchisq(0.995, length(obs))/length(obs), lty=2)
   }
