@@ -437,7 +437,12 @@ RotateBasis <- function(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.
     var_sum <- crossprod(c(data))
   }
   else {
-    var_sum <- sum(diag(t(data) %*% weightinv %*% data)) # only need to calculate once
+    if (attributes(weightinv)$diagonal == TRUE){
+      var_sum <- sum(t(data)^2 %*% diag(weightinv))
+    }
+    else {
+      var_sum <- sum(diag(t(data) %*% weightinv %*% data))
+    }
   }
   if (is.null(DataBasis$Q)){
     Q <- NULL
