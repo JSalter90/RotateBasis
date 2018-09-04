@@ -47,27 +47,33 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen 
 #'
 #' @param data n x l matrix to calculate basis from (i.e. rows are output fields).
 #' @param weightinv l x l inverse of W. If NULL, calculates standard SVD.
-#' @param Q l x l matrix from eigen decomposition of W^{-1}, can provide in place of weightinv
-#' @param Lambda vector from eigen decomposition of W^{-1}, can provide in place of weightinv
+#' @param Q l x l matrix from eigen decomposition of W^{-1}, if already have this then speeds up calculation of basis
+#' @param Lambda vector from eigen decomposition of W^{-1}, if already have this then speeds up calculation of basis
 #'
 #' @return The weighted SVD of the data.
 #'
 wsvd <- function(data, weightinv = NULL, Q = NULL, Lambda = NULL){
-  if (is.null(weightinv) & is.null(Q) & is.null(Lambda)){
+  if (is.null(weightinv)){
     svd_output <- svd(data)
   }
   else {
     stopifnot(dim(data)[2] == dim(weightinv)[1])
-    if (is.null(Q)){
+    if (is.null(Q) & attributes(weightinv)$diagonal == FALSE){
       eig <- eigen(weightinv)
       Q <- eig$vectors
       Lambda <- eig$values
+      data_w <- data %*% Q %*% diag(sqrt(Lambda)) %*% t(Q)
+      svd_output <- svd(data_w)
+      svd_output$v <- t(t(svd_output$v) %*% Q %*% diag(1 / sqrt(Lambda)) %*% t(Q))
+      svd_output$Q <- Q
+      svd_output$Lambda <- Lambda
     }
-    data_w <- data %*% Q %*% diag(sqrt(Lambda)) %*% t(Q)
-    svd_output <- svd(data_w)
-    svd_output$v <- t(t(svd_output$v) %*% Q %*% diag(1 / sqrt(Lambda)) %*% t(Q))
-    svd_output$Q <- Q
-    svd_output$Lambda <- Lambda
+    else if (attributes(weightinv)$diagonal == TRUE){
+      diag_values <- diag(weightinv)
+      data_w <- data %*% diag(sqrt(diag_values))
+      svd_output <- svd(data_w)
+      svd_output$v <- t(t(svd_output$v) %*% diag(1 / sqrt(diag_values)))
+    }
   }
   return(svd_output)
 }
