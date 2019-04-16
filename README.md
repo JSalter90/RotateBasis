@@ -8,14 +8,10 @@ If you spot a bug or have queries about how to use RotateBasis, contact j.m.salt
 
 ## Files
 
-rotation_functions.R - source code for the functions
+R/rotation_functions.R - source code for the functions
 
-example.R - a worked toy example
+R/example.R - a worked toy example
 
-general_help.R - general strategy for how to set up data, W, and use the key functions
+R/general_help.R - general strategy for how to set up data, W, and use the key functions
 
-## Updates to come:
-
-- More examples/documentation
-- Improved optimisation at the rotation step
-- Automatically setting v
+FastHM.R - history matching high-dimensional output efficiently
