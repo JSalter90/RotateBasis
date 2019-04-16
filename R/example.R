@@ -58,16 +58,21 @@ Coeffs2 <- CalcScores(data = DataBasis2$CentredField, basis = DataBasis2$tBasis[
 # Can set MaxTime low here as have small ensemble and l = 100, although MaxTime=30 or 60 usually fine
 RotatedBasis1 <- RotateBasis(DataBasis = DataBasis1, obs = obsc, kmax = 3, v = c(0.4,0.1,0.1), MaxTime = 5)
 RotatedBasis2 <- RotateBasis(DataBasis = DataBasis2, obs = obsc, weightinv = Winv, kmax = 3, v = c(0.4,0.1,0.1), MaxTime = 5)
-# Are resulting vectors orthogonal in W?
+# Resulting vectors are orthogonal in L2, W respectively
 sum(RotatedBasis1$tBasis[,1] * RotatedBasis1$tBasis[,4])
-RotatedBasis2$tBasis[,1] %*% Winv %*% RotatedBasis2$tBasis[,2]
-# Do we minimise R_W/do better than before?
+RotatedBasis2$tBasis[,1] %*% Winv %*% RotatedBasis2$tBasis[,3]
+# Do we minimise R_W/do better than before? Compare SVD vs rotated for each
 par(mfrow=c(1,2), mar = c(4,2,2,2))
 VarMSEplot(RecVarData = v1, obs = obsc, ylim = c(0,26))
 VarMSEplot(DataBasis = RotatedBasis1, obs = obsc, ylim = c(0,26))
 
 VarMSEplot(RecVarData = v2, obs = obsc, weightinv = Winv, ylim = c(0,500))
 VarMSEplot(DataBasis = RotatedBasis2, obs = obsc, weightinv = Winv, ylim = c(0,500))
+
+# So now we have a rotated basis that better represents observations (truncation now after we've
+# minimised reconstruction error R_W), project onto rotated basis
+# Usually require an extra basis vector to explain same proportion
+q2rot <- ExplainT(RotatedBasis2, vtot = 0.95, weightinv = Winv)
 
 # Look at some plots of the bases, reconstructions
 plot.field <- function(field, dim1, col = rainbow(100,start=0.1,end=0.8), ...){
@@ -101,19 +106,9 @@ plot.field(ObsRecon, dim1 = 10, zlim = c(-10,26), main = "SVD basis recon")
 ObsReconRot <- DataBasis2$EnsembleMean + ReconObs(obsc, RotatedBasis2$tBasis[,1:q2rot], weightinv = Winv)
 plot.field(ObsReconRot, dim1 = 10, zlim = c(-10,26), main = "Rotated basis recon")
 
-# So now we have a rotated basis that better represents observations (truncation now after we've
-# minimised reconstruction error R_W), project onto rotated basis
-# Usually require an extra basis vector to explain same proportion
-q2rot <- ExplainT(RotatedBasis2, vtot = 0.95, weightinv = Winv)
+# Then emulate each set of coeffs (each column of RotatedCoeffs)
 RotatedCoeffs <- CalcScores(data = RotatedBasis2$CentredField, basis = RotatedBasis2$tBasis[,1:q2rot], weightinv = Winv)
 dim(RotatedCoeffs) # number of ensemble members x number of basis vectors to emulate
-
-# Then emulate each set of coeffs (each column of RotatedCoeffs)
-
-
-# Other examples to come:
-# Instead define some pattern, find residual basis - check orthogonal in correct norm
-# History matching coefficients efficiently
 
 
 

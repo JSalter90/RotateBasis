@@ -25,9 +25,9 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen 
     EnsembleMean <- c(rep(0, dim(data)[1]))
     CentredField <- data
   }
-  if (is.null(weightinv)){
-    weightinv <- diag(dim(data)[1])
-  }
+  #if (is.null(weightinv)){
+  #  weightinv <- diag(dim(data)[1])
+  #}
   tSVD <- wsvd(t(CentredField), weightinv = weightinv)
   tBasis <- tSVD$v
   if (StoreEigen == TRUE){
@@ -68,11 +68,18 @@ wsvd <- function(data, weightinv = NULL, Q = NULL, Lambda = NULL){
       svd_output$Q <- Q
       svd_output$Lambda <- Lambda
     }
-    else if (attributes(weightinv)$diagonal == TRUE){
+    else if (is.null(Q) & attributes(weightinv)$diagonal == TRUE){
       diag_values <- diag(weightinv)
       data_w <- data %*% diag(sqrt(diag_values))
       svd_output <- svd(data_w)
       svd_output$v <- t(t(svd_output$v) %*% diag(1 / sqrt(diag_values)))
+    }
+    else if (!is.null(Q)){
+      data_w <- data %*% Q %*% diag(sqrt(Lambda)) %*% t(Q)
+      svd_output <- svd(data_w)
+      svd_output$v <- t(t(svd_output$v) %*% Q %*% diag(1 / sqrt(Lambda)) %*% t(Q))
+      svd_output$Q <- Q
+      svd_output$Lambda <- Lambda
     }
   }
   return(svd_output)
@@ -530,11 +537,6 @@ ResidBasis <- function(basisvectors, data, weightinv = NULL, ...){
 #' @return The proportion of variability in the data that is explained by the basis
 #'
 #' @export
-#VarExplained <- function(basis, data, ...){
-#  recon <- basis %*% t(CalcScores(data, basis, ...))
-#  explained <- crossprod(c(recon))/crossprod(c(data))
-#  return(explained)
-#}
 VarExplained <- function(basis, data, weightinv = NULL, total_sum = NULL, psi = NULL, basis_lincom = NULL){
   coeffs <- t(CalcScores(data, basis, weightinv))
   recon <- basis %*% coeffs
