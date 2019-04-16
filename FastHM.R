@@ -1,4 +1,4 @@
-source('R/rotation_functions.R')
+source('rotation_functions.R')
 
 #' History matching
 #'
