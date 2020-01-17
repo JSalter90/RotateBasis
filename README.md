@@ -14,4 +14,4 @@ example.R - a worked toy example
 
 general_help.R - general strategy for how to set up data, W, and use the key functions
 
-FastHM.R - history matching high-dimensional output efficiently
+FastHM.R - history matching high-dimensional output efficiently (see https://arxiv.org/pdf/1906.05758.pdf)
