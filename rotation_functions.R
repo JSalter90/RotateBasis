@@ -13,7 +13,7 @@
 #' \item{}
 #'
 #' @export
-MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen = TRUE){
+MakeDataBasis <- function(data, weightinv = NULL, W = NULL, RemoveMean = TRUE, StoreEigen = TRUE){
   if (RemoveMean == TRUE){
     EnsembleMean <- apply(data, 1, mean)
     CentredField <- 0*data
@@ -28,15 +28,33 @@ MakeDataBasis <- function(data, weightinv = NULL, RemoveMean = TRUE, StoreEigen 
   #if (is.null(weightinv)){
   #  weightinv <- diag(dim(data)[1])
   #}
-  tSVD <- wsvd(t(CentredField), weightinv = weightinv)
-  tBasis <- tSVD$v
-  if (StoreEigen == TRUE){
-    Q <- tSVD$Q
-    Lambda <- tSVD$Lambda
-    return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean, Q = Q, Lambda = Lambda))
+  if (is.null(W)){
+    tSVD <- wsvd(t(CentredField), weightinv = weightinv)
+    tBasis <- tSVD$v
+    if (StoreEigen == TRUE){
+      Q <- tSVD$Q
+      Lambda <- tSVD$Lambda
+      return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean, Q = Q, Lambda = Lambda))
+    }
+    else {
+      return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean))
+    }
   }
-  else {
-    return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean))
+  else if (!is.null(W) & is.null(weightinv)){
+    eig <- eigen(W)
+    Q <- eig$vectors
+    Lambda <- 1 / eig$values
+    Winv <- Q %*% diag(Lambda) %*% t(Q)
+    attr(Winv, 'diagonal') <- FALSE
+    attr(Winv, 'identity') <- FALSE
+    tSVD <- wsvd(t(CentredField), weightinv = Winv, Q = Q, Lambda = Lambda)
+    tBasis <- tSVD$v
+    if (StoreEigen == TRUE){
+      return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean, Q = Q, Lambda = Lambda, Winv = Winv))
+    }
+    else {
+      return(list(tBasis = tBasis, CentredField = CentredField, EnsembleMean = EnsembleMean, Winv = Winv))
+    }
   }
 }
 
@@ -437,6 +455,7 @@ RotateBasis <- function(DataBasis, obs, kmax = 5, weightinv = NULL, v = c(rep(0.
   if (is.null(prior)){
     prior <- c(1:dim(basis)[2])
   }
+  basis <- basis[,prior]
   mse <- var <- numeric(kmax)
   x <- NULL
   new.basis <- NULL
@@ -634,7 +653,8 @@ VarMSEplot <- function(DataBasis, obs, RecVarData = NULL, weightinv=NULL, min.li
   else {
     plotseq <- 1:p
   }
-  plot(plotseq, PlotData[,1], type="l", col="red",xlab = expression(k), ylab=expression(paste("R "[bold(W)], " (", bold(B)[k], ",", bold(z), ")", " / l")), ...)
+  plot(plotseq, PlotData[,1], type="l", col="red",xlab = expression(k), ylab = '', ...)
+  mtext(side = 2, line = 2.5, expression(paste("R "[bold(W)], " (", bold(B)[k], ",", bold(z), ")", " / l")), las = 3, cex = 0.8)
   if (min.line)
     abline(h = min(PlotData[,1]), col=alpha("black", 0.7), lty=4)
   if (bound == TRUE){
