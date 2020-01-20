@@ -15,3 +15,5 @@ example.R - a worked toy example
 general_help.R - general strategy for how to set up data, W, and use the key functions
 
 FastHM.R - history matching high-dimensional output efficiently (see https://arxiv.org/pdf/1906.05758.pdf)
+
+Gasp.R - wrappers for using RobustGasp emulators (note - for full functionality requires ExeterUQ https://github.com/BayesExeter/ExeterUQ, improvements to this and integration with ATI emulation code coming soon)
